@@ -12,6 +12,15 @@ To return the directory to its saved state:
 
 ```bash
 ./catch release
+or
+./catch r
+```
+
+
+After doing `catch release` you can also return to the point before releasing with:
+
+```bash
+./catch reset
 ```
 
 ## General notes:
