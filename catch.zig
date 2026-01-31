@@ -155,8 +155,6 @@ pub fn do_release(allocator: std.mem.Allocator, target_dir: []const u8) !void {
         std.fs.cwd().makePath(directory_path) catch {};
 
         print("{s}\n", .{path});
-        std.debug.print("Directory: {s}\n", .{directory_path});
-
         try std.fs.cwd().writeFile(.{
             .data = file.bytes,
             .flags = .{},
