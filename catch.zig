@@ -136,8 +136,12 @@ pub fn get_directory_path(allocator: Allocator, file_path: []const u8) ![]const 
     return copy;
 }
 
-pub fn do_release(allocator: std.mem.Allocator, target_dir: []const u8) !void {
-    const bytes = try fs.cwd().readFileAlloc(allocator, ".catch", std.math.maxInt(usize));
+pub fn do_release(allocator: std.mem.Allocator, file_path: []const u8, target_dir: []const u8, capture_current: bool) !void {
+    if(capture_current and !file_exists(".catch-current")) {
+        try do_catch(allocator, ".catch-current");
+    }
+
+    const bytes = try fs.cwd().readFileAlloc(allocator, file_path, std.math.maxInt(usize));
     defer allocator.free(bytes);
 
     var files = try read_files(allocator, bytes);
@@ -163,26 +167,48 @@ pub fn do_release(allocator: std.mem.Allocator, target_dir: []const u8) !void {
     }
 }
 
+fn command(arg1: ?[]const u8, c: []const u8) bool {
+    if(arg1) |a| {
+        return std.mem.eql(u8, a, c);
+    }
+    return false;
+}
+
+fn file_exists(path: []const u8) bool {
+    fs.cwd().access(path, .{}) catch  {
+        return false;
+    };
+
+    return true;
+}
+
 pub fn main() !void {
     const args = std.os.argv;
+
+    var arg1: ?[]const u8 = null;
+    if(args.len >= 2) {
+        arg1 = std.mem.span(args[1]);
+    }
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer if (gpa.deinit() != .ok) @panic("leak");
     const allocator = gpa.allocator();
 
-    if(args.len >= 2 and std.mem.eql(u8, std.mem.span(args[1]), "release")) {
-        var exists = true;
+    if(command(arg1, "release") or command(arg1, "r")) {
 
-        fs.cwd().access(".releasestop", .{}) catch {
-            exists = false;
-        };
+        if(file_exists(".releasestop")) return;
 
-        if(exists) {
-            std.debug.print("Found releasestop file stopping release \n", .{});
-            return;
-        }
+        try do_release(allocator, ".catch",".", true);
+        return;
+    }
 
-        try do_release(allocator, ".");
+    if(command(arg1, "reset")) {
+        if(file_exists(".releasestop")) return;
+
+        try do_release(allocator,".catch-current", ".", false);
+
+        try std.fs.cwd().deleteFile(".catch-current");
+        
         return;
     }
 
