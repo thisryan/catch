@@ -152,7 +152,7 @@ pub fn do_release(allocator: std.mem.Allocator, target_dir: []const u8) !void {
         const directory_path = try get_directory_path(allocator, path);
         defer allocator.free(directory_path);
 
-        std.fs.cwd().makeDir(directory_path) catch {};
+        std.fs.cwd().makePath(directory_path) catch {};
 
         print("{s}\n", .{path});
         std.debug.print("Directory: {s}\n", .{directory_path});
