@@ -1,0 +1,4 @@
+.zig-cache
+.releasestop
+*.out
+*.catch
