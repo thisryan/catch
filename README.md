@@ -1,3 +1,6 @@
+> [!Note]
+> All functionality of this program can be achieved using `git` this is purely for educational purposes. Or in cases you realy dont want to use a git repo for some reason.
+
 # Catch
 
 A simple program so save the state of a directory to later return it to this state.
